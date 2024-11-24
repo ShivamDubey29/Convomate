@@ -128,8 +128,23 @@ body{
     align-self: flex-start;
 }
 
+.chat-list .message.loading .avatar{
+    animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+    100%{
+        transform: rotate(360deg);
+    }
+}
+
 .chat-list .message .text{
     color: var(--text-color);
+}
+
+.chat-list .message.loading .text{
+    display: none;
+
 }
 
 .chat-list .message .icon{
@@ -146,7 +161,7 @@ body{
     visibility: hidden;
 }
 
-.chat-list .message:hover .icon{
+.chat-list .message:not(.loading):hover .icon{
     visibility: visible;
 }
 .chat-list .message .icon:hover{
@@ -156,15 +171,37 @@ body{
 .chat-list .loading-indicator{
     display: flex;
     width: 100%;
-    gap: 0.8rem;
+    gap:0.8rem;
     flex-direction: column;
 }
 
 .chat-list .loading-indicator .loading-bar{
-    height: 11px;
+    /* height: 11px;
     width: 100%;
-    background: linear-gradient(to right, #4285f4 var(--secondary-color),#4285f4)!important;
-}
+    background: linear-gradient(to right, #4285f4 var(--primary-color),#4285f4); */
+        height: 11px;
+        width: 100%;
+        border-radius: 0.14rem;
+        background: linear-gradient(to right, #4385f4, var(--primary-color),#4285f4); /* Debugging color */
+        animation: animate 3s linear infinite;
+    }
+
+    .chat-list .loading-indicator .loading-bar:last-child{
+        width: 70%;
+
+    }
+
+    @keyframes animate {
+        0%{
+            background-position: -800px 0;
+        }
+
+        100%{
+            background-position: 800px 0;
+        }
+    }
+
+
 
 .typing-area{
     position: fixed;
