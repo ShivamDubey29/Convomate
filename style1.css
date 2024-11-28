@@ -2,7 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
 
 *{
-    margin: 0px;
+    margin: 4px;
     padding: 0;
     box-sizing: border-box;
     font-family: "Poppins", sans-serif;
@@ -169,10 +169,14 @@ body{
 }
 
 .chat-list .loading-indicator{
-    display: flex;
+    display: none;
     width: 100%;
     gap:0.8rem;
     flex-direction: column;
+}
+
+.chat-list .message.loading .loading-indicator{
+    display: flex;
 }
 
 .chat-list .loading-indicator .loading-bar{
