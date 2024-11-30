@@ -1,6 +1,7 @@
 const typingForm = document.querySelector(".typing-form");
 const chatList = document.querySelector(".chat-list");
 const toggleThemeButton = document.querySelector("#toggle-theme-button");
+const deleteChatButton = document.querySelector("#delete-chat-button");
 
 let userMessage = null;
 
@@ -18,7 +19,10 @@ const localStorageData = () =>{
     toggleThemeButton.innerText = isLightMode ? "dark_mode" : "light_mode";
 
     //Restore saved Chats
-    chatList.innerHTML = savedChats ||"";
+    // s//Hide the header once chat start  ||"";
+
+    document.body.classList.toggle("hide-header", savedChats); //Hide the header once chat start 
+    chatList.scrollTo(0,chatList.scrollHeight);//scroll to bottom
 }
 localStorageData();
 
@@ -32,20 +36,23 @@ const createMessageEkement = (content, ...classes ) => {
 }
 //BT Sarted (To be resolved)
 //Show typing effect by displaying words one by one
-const showTypingEffect = (text, textElement) =>{
-    const words = text.split(' ');
+const showTypingEffect = (text, textElement,incomingMessageDiv ) =>{
+    const words = text.split('  ');
     let currentWordIndex = 0;
 
     const typingInterval = setInterval(()=>{
         //Append each word to the text element with a space 
         textElement.innerText +=(currentWordIndex === 0 ? '' :'' ) + words[currentWordIndex++];
+        incomingMessageDiv.querySelector(".icon").classList.add("hide");
 
         //If all words are displayed 
         if(currentWordIndex === words.length){
             clearInterval(typingInterval)
-const chatList = document.querySelector(".chat-list");
-            localStorag.setItem("savedChats",chatList.innerHTML); // Save chats to local storage 
+            incomingMessageDiv.querySelector(".icon").classList.remove("hide");
+// const chatList = document.querySelector(".chat-list");
+            localStorage.setItem("savedChats",chatList.innerHTML); // Save chats to local storage 
         }
+        chatList.scrollTo(0,chatList.scrollHeight);//scroll to bottom
     },75);
 }
 
@@ -69,7 +76,7 @@ const generateAPIResponse = async (incomingMessageDiv) =>{
 
         //Get the API response text
         const apiResponse = data?.candidates[0].content.parts[0].text;
-        showTypingEffect(apiResponse, textElement);
+        showTypingEffect(apiResponse, textElement,incomingMessageDiv);
     }catch(error){
         console.log(error);
     } finally{
@@ -94,6 +101,7 @@ const showLoadingAnimation = () =>{
 const incomingMessageDiv = createMessageEkement(html,"incoming", "loading");
 chatList.appendChild(incomingMessageDiv);
 
+chatList.scrollTo(0,chatList.scrollHeight);//scroll to bottom
 generateAPIResponse(incomingMessageDiv);
 }
 
@@ -120,6 +128,8 @@ outgoingMessageDiv.querySelector(".text").innerText = userMessage;
 chatList.appendChild(outgoingMessageDiv);
 
 typingForm.reset(); //Clear input field
+chatList.scrollTo(0,chatList.scrollHeight);//scroll to bottom
+document.body.classList.add("hide-header"); //Hide the header once chat start 
 setTimeout(showLoadingAnimation, 500);//show loading animation after a delay
 }
 
@@ -129,6 +139,14 @@ toggleThemeButton.addEventListener("click", () =>{
   localStorage.setItem("themeColor",isLightMode ? "light_mode" : "dark_mode");
     toggleThemeButton.innerText = isLightMode ? "dark_mode" : "light_mode";
 })
+
+//Delte all chats form local storage when button is clicked
+// deleteChatButton.addEventListener("click",() =>{
+//     if(confirm("Are you sure you want to delete all messages?")){
+//         localStorage.removeItem("savedChats");
+//         localStorage();
+//     }
+// })
 
 //Prevent default from submission and handle outgoing chat
 typingForm.addEventListener("submit",(e)=>{

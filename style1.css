@@ -43,9 +43,14 @@ body{
 }
 
 .header{
-    /* margin-top:7vh; */
+    margin-top:7vh;
     padding:1rem;
+}
+
+body.hide-header .header {
     display: none;
+    margin-top:0;
+
 }
 
 .header :where(.title, .subtitle){
@@ -114,13 +119,11 @@ body{
     padding: 2rem 1rem 12rem;
     max-height: 100vh;
     overflow-y: auto;
-
+    scrollbar-color: #999 transparent;
 }
 
 .chat-list .message .incoming{
     margin-top: 1.5rem;
-
-
 }
 
 .chat-list .message .message-content{
@@ -171,7 +174,7 @@ body{
     visibility: hidden;
 }
 
-.chat-list .message:not(.loading):hover .icon{
+.chat-list .message:not(.loading):hover .icon:not(.hide){
     visibility: visible;
 }
 .chat-list .message .icon:hover{
