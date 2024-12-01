@@ -1,10 +1,11 @@
 const typingForm = document.querySelector(".typing-form");
 const chatList = document.querySelector(".chat-list");
+const suggestions = document.querySelectorAll(".suggestion-list .suggestion");
 const toggleThemeButton = document.querySelector("#toggle-theme-button");
 const deleteChatButton = document.querySelector("#delete-chat-button");
 
 let userMessage = null;
-
+let isReponseGenerating = false;
 //API Configuration
 const API_KEY = "AIzaSyBiQNqr17DoMqIsgu9JvEbcHIOul1ln1-4";
 
@@ -19,7 +20,9 @@ const localStorageData = () =>{
     toggleThemeButton.innerText = isLightMode ? "dark_mode" : "light_mode";
 
     //Restore saved Chats
-    // s//Hide the header once chat start  ||"";
+
+    chatList.innerHTML = savedChats || "";
+    //Hide the header once chat start  ||"";
 
     document.body.classList.toggle("hide-header", savedChats); //Hide the header once chat start 
     chatList.scrollTo(0,chatList.scrollHeight);//scroll to bottom
@@ -48,6 +51,7 @@ const showTypingEffect = (text, textElement,incomingMessageDiv ) =>{
         //If all words are displayed 
         if(currentWordIndex === words.length){
             clearInterval(typingInterval)
+            isReponseGenerating = false;
             incomingMessageDiv.querySelector(".icon").classList.remove("hide");
 // const chatList = document.querySelector(".chat-list");
             localStorage.setItem("savedChats",chatList.innerHTML); // Save chats to local storage 
@@ -73,12 +77,15 @@ const generateAPIResponse = async (incomingMessageDiv) =>{
         });
 
         const data = await response.json();
+        if(!response.ok) throw new Error(data.error.message);
 
-        //Get the API response text
-        const apiResponse = data?.candidates[0].content.parts[0].text;
+        //Get the API response text and reomve asterisks from it
+    const apiResponse = data?.candidates[0].content.parts[0].text.replace(/\*\*(.*?)\*\*/g,'$1');
         showTypingEffect(apiResponse, textElement,incomingMessageDiv);
     }catch(error){
-        console.log(error);
+        isReponseGenerating = false;
+        textElement.innerText = error.message;
+        textElement.classList.add("error");
     } finally{
         incomingMessageDiv.classList.remove("loading");
     }
@@ -115,8 +122,10 @@ const copyMessage = (copyIcon) =>{
 
 //Handle sendong outgoing chat messages 
 const handleOutgoingChat = () =>{
-    userMessage = typingForm.querySelector(".typing-input").value.trim();
-    if(!userMessage)return; //exit if there is no message 
+    userMessage = typingForm.querySelector(".typing-input").value.trim() || userMessage;
+    if(!userMessage || isReponseGenerating)return; //exit if there is no message 
+
+    isReponseGenerating = true;
 
     const html = `  <div class="message-content">
     <img src="images/user.jpg" alt="User" class="avatar">
@@ -133,6 +142,15 @@ document.body.classList.add("hide-header"); //Hide the header once chat start
 setTimeout(showLoadingAnimation, 500);//show loading animation after a delay
 }
 
+//Set userMessage and handle outgoing chat when a suggestion is clicked 
+suggestions.forEach(suggestion =>{
+    suggestion.addEventListener("click",() =>{
+        userMessage = suggestion.querySelector(".text").innerText;
+        handleOutgoingChat();
+
+    })
+});
+
 //Toggle between light and dark themes 
 toggleThemeButton.addEventListener("click", () =>{
   const isLightMode = document.body.classList.toggle("light_mode");
@@ -141,12 +159,12 @@ toggleThemeButton.addEventListener("click", () =>{
 })
 
 //Delte all chats form local storage when button is clicked
-// deleteChatButton.addEventListener("click",() =>{
-//     if(confirm("Are you sure you want to delete all messages?")){
-//         localStorage.removeItem("savedChats");
-//         localStorage();
-//     }
-// })
+deleteChatButton.addEventListener("click",() =>{
+    if(confirm("Are you sure you want to delete all messages?")){
+        localStorage.removeItem("savedChats");
+        localStorageData();
+    }
+})
 
 //Prevent default from submission and handle outgoing chat
 typingForm.addEventListener("submit",(e)=>{
